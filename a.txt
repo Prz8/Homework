@@ -29,7 +29,8 @@ CREATE TABLE summary_section (
 
 C.	Write a SQL query that will extract the raw data needed for the Detailed section of your report from the source database and verify the data’s accuracy.
 
--- Insert the raw data for the Detailed section
+
+
 INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, payment_date, total_cash_spent, top_30_cash_spender)
 SELECT
     c.customer_id,
@@ -48,16 +49,6 @@ FROM
 JOIN
     payment p ON c.customer_id = p.customer_id;
 
--- Verify the data’s accuracy
-SELECT * FROM detailed_section;
-
-
-
-I verified the data’s accuracy by running the query below. I looked for any empty or invalid cells in the table, as well as spot checked the columns to make sure the rows data types matched the column’s data types.
-
-
-SELECT * FROM detailed_section;
-
 
 
 
@@ -65,9 +56,10 @@ D Write code for function(s) that perform the transformation(s) you identified i
 
 
 -- Create or replace the function to perform the transformation
+
 CREATE OR REPLACE FUNCTION translate_top_30_cash_spender()
     RETURNS TABLE (
-        translated_top_30_cash_spender VARCHAR(3),
+        translated_top_30_cash_spender VARCHAR(10),
         customer_id INT,
         first_name VARCHAR(50),
         last_name VARCHAR(50),
@@ -107,7 +99,6 @@ SELECT * FROM detailed_section ORDER BY total_cash_spent DESC;
 
 
 
-
 E.	Write a SQL code that creates a trigger on the detailed table of the report that will continually update the summary table as data is added to the detailed table
 
 
@@ -118,7 +109,7 @@ CREATE OR REPLACE FUNCTION update_summary()
 $$
 BEGIN
   -- Insert or update the corresponding row in the summary table
-  INSERT INTO summary_section (customer_id, first_name, last_name, email, creation_date, total_cash_spent, top_30_cash_spender)
+  INSERT INTO summary_section (customer_id, first_name, last_name, email, creation_date, total_cash_spent, top_30_cash_spender_translated)
   VALUES (
     NEW.customer_id,
     NEW.first_name,
@@ -135,7 +126,7 @@ BEGIN
     email = EXCLUDED.email,
     creation_date = EXCLUDED.creation_date,
     total_cash_spent = EXCLUDED.total_cash_spent,
-    top_30_cash_spender = EXCLUDED.top_30_cash_spender;
+    top_30_cash_spender_translated = EXCLUDED.top_30_cash_spender_translated;
 
   RETURN NEW;
 END;
@@ -143,14 +134,14 @@ $$
 LANGUAGE plpgsql;
 
 -- Create the trigger on the detailed_section table
+
 CREATE TRIGGER update_trigger
 AFTER INSERT ON detailed_section
 FOR EACH ROW
 EXECUTE FUNCTION update_summary();
 
--- Verification query
-
 -- Insert a row into the detailed_section table
+
 INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, payment_date, total_cash_spent, top_30_cash_spender)
 VALUES ('777', 'John', 'Doe', 'j.d@gmail.com', '2017-02-19', NULL, 0.0, 'N');
 
@@ -164,34 +155,27 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     -- Clear the contents of the detailed and summary tables
-    EXECUTE 'DELETE FROM detailed_section';
-    EXECUTE 'DELETE FROM summary_section';
+    DELETE FROM detailed_section;
+    DELETE FROM summary_section;
 
     -- Perform the ETL load process
-    INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, total_cash_spent, top_30_cash_spender)
+    INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, payment_date, total_cash_spent, top_30_cash_spender)
     SELECT
         c.customer_id,
         c.first_name,
         c.last_name,
         c.email,
         c.create_date AS creation_date,
-        SUM(f.rental_rate) AS total_cash_spent,
+        p.payment_date,
+        p.amount AS total_cash_spent,
         CASE
-            WHEN SUM(f.rental_rate) > 105 THEN 'Y'
+            WHEN p.amount > 105 THEN 'Y'
             ELSE 'N'
         END AS top_30_cash_spender
     FROM
         customer c
     JOIN
-        rental r ON r.customer_id = c.customer_id
-    JOIN
-        inventory i ON i.inventory_id = r.inventory_id
-    JOIN
-        film f ON i.film_id = f.film_id
-    GROUP BY
-        c.customer_id, c.first_name, c.last_name, c.email, c.create_date
-    ORDER BY
-        total_cash_spent DESC;
+        payment p ON c.customer_id = p.customer_id;
 
     -- Update the translated value in the summary table
     UPDATE summary_section
@@ -203,7 +187,5 @@ $$;
 -- Call the refresh_tables procedure
 CALL refresh_tables();
 
--- Verification query
+-- Verify the data in the summary_section table
 SELECT * FROM summary_section;
-
-
