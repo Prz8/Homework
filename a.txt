@@ -151,7 +151,7 @@ BEGIN
     EXECUTE 'DELETE FROM summary_section';
 
     -- Perform the ETL load process
-    INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, total_cash_spent, top_30_cash_spender_translated)
+    INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, total_cash_spent, top_30_cash_spender)
     SELECT
         c.customer_id,
         c.first_name,
@@ -160,9 +160,9 @@ BEGIN
         c.create_date AS creation_date,
         SUM(f.rental_rate) AS total_cash_spent,
         CASE
-            WHEN SUM(f.rental_rate) > 101 THEN 'Y'
+            WHEN SUM(f.rental_rate) > 118 THEN 'Y'
             ELSE 'N'
-        END AS top_30_cash_spender_translated
+        END AS top_30_cash_spender
     FROM
         customer c
     JOIN
@@ -178,7 +178,7 @@ BEGIN
 
     -- Update the translated value in the summary table
     UPDATE summary_section
-    SET top_30_cash_spender_translated = translate_top_30_cash_spender(top_30_cash_spender_translated);
+    SET top_30_cash_spender_translated = translate_top_30_cash_spender(top_30_cash_spender);
     
 END;
 $$;
@@ -188,6 +188,5 @@ CALL refresh_tables();
 
 -- Verification query
 SELECT * FROM summary_section;
-
 
 
