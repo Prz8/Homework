@@ -11,6 +11,7 @@ CREATE TABLE detailed_section (
   creation_date DATE,
   payment_date DATE,
   total_cash_spent DECIMAL(10, 2)
+  top_30_cash_spender CHAR(1)
 );
 
 -- Create the table to hold summary section data
@@ -28,7 +29,8 @@ CREATE TABLE summary_section (
 
 C.	Write a SQL query that will extract the raw data needed for the Detailed section of your report from the source database and verify the data’s accuracy.
 
-INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, payment_date, total_cash_spent)
+-- Insert the raw data for the Detailed section
+INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, payment_date, total_cash_spent, top_30_cash_spender)
 SELECT
     c.customer_id,
     c.first_name,
@@ -36,11 +38,19 @@ SELECT
     c.email,
     c.create_date AS creation_date,
     p.payment_date,
-    p.amount AS total_cash_spent
+    p.amount AS total_cash_spent,
+    CASE
+        WHEN p.amount > 101 THEN 'Y'
+        ELSE 'N'
+    END AS top_30_cash_spender
 FROM
     customer c
 JOIN
     payment p ON c.customer_id = p.customer_id;
+
+-- Verify the data’s accuracy
+SELECT * FROM detailed_section;
+
 
 
 I verified the data’s accuracy by running the query below. I looked for any empty or invalid cells in the table, as well as spot checked the columns to make sure the rows data types matched the column’s data types.
