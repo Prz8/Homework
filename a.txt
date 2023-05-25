@@ -10,7 +10,7 @@ CREATE TABLE detailed_section (
   email VARCHAR(100),
   creation_date DATE,
   payment_date DATE,
-  total_cash_spent DECIMAL(10, 2)
+  total_cash_spent DECIMAL(10, 2),
   top_30_cash_spender CHAR(1)
 );
 
