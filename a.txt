@@ -40,7 +40,7 @@ SELECT
     p.payment_date,
     p.amount AS total_cash_spent,
     CASE
-        WHEN p.amount > 110 THEN 'Y'
+        WHEN p.amount > 105 THEN 'Y'
         ELSE 'N'
     END AS top_30_cash_spender
 FROM
@@ -64,35 +64,46 @@ SELECT * FROM detailed_section;
 D Write code for function(s) that perform the transformation(s) you identified in part A4
 
 
--- Create or replace the function to perform the translation
-CREATE OR REPLACE FUNCTION translate_top_30_cash_spender(value CHAR(1))
-    RETURNS VARCHAR(3) AS
-$$
+-- Create or replace the function to perform the transformation
+CREATE OR REPLACE FUNCTION translate_top_30_cash_spender()
+    RETURNS TABLE (
+        translated_top_30_cash_spender VARCHAR(3),
+        customer_id INT,
+        first_name VARCHAR(50),
+        last_name VARCHAR(50),
+        email VARCHAR(100),
+        creation_date DATE,
+        total_cash_spent DECIMAL(10, 2)
+    ) AS $$
 BEGIN
-    IF value = 'Y' THEN
-        RETURN 'Yes';
-    ELSIF value = 'N' THEN
-        RETURN 'No';
-    ELSE
-        RETURN 'Unknown';
-    END IF;
+    UPDATE detailed_section
+    SET top_30_cash_spender =
+        CASE
+            WHEN top_30_cash_spender = 'Y' THEN 'Yes'
+            WHEN top_30_cash_spender = 'N' THEN 'No'
+        END
+    WHERE total_cash_spent > 0;
+    
+    RETURN QUERY SELECT
+        CASE
+            WHEN top_30_cash_spender = 'Yes' THEN 'Positive'
+            WHEN top_30_cash_spender = 'No' THEN 'Negative'
+            ELSE 'Unknown'
+        END AS translated_top_30_cash_spender,
+        customer_id,
+        first_name,
+        last_name,
+        email,
+        creation_date,
+        total_cash_spent
+    FROM detailed_section;
 END;
 $$
 LANGUAGE PLPGSQL;
 
 -- Verify the accuracy of the function
-SELECT
-    customer_id,
-    first_name,
-    last_name,
-    email,
-    creation_date,
-    payment_date,
-    total_cash_spent,
-    translate_top_30_cash_spender(top_30_cash_spender) AS translated_top_30_cash_spender
-FROM
-    detailed_section;
-
+SELECT * FROM translate_top_30_cash_spender();
+SELECT * FROM detailed_section ORDER BY total_cash_spent DESC;
 
 
 
@@ -142,8 +153,6 @@ EXECUTE FUNCTION update_summary();
 INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, payment_date, total_cash_spent, top_30_cash_spender)
 VALUES ('777', 'John', 'Doe', 'j.d@gmail.com', '2017-02-19', NULL, 0.0, 'N');
 
--- Check the summary_section table
-SELECT * FROM summary_section;
 
 
 
