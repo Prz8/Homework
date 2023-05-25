@@ -11,7 +11,7 @@ CREATE TABLE detailed_section (
   creation_date DATE,
   payment_date DATE,
   total_cash_spent DECIMAL(10, 2),
-  top_30_cash_spender CHAR(1)
+  top_30_cash_spender CHAR(3)
 );
 
 -- Create the table to hold summary section data
