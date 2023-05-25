@@ -86,16 +86,16 @@ BEGIN
     
     RETURN QUERY SELECT
         CASE
-            WHEN top_30_cash_spender = 'Yes' THEN 'Positive'
-            WHEN top_30_cash_spender = 'No' THEN 'Negative'
+            WHEN detailed_section.top_30_cash_spender = 'Yes' THEN 'Positive'
+            WHEN detailed_section.top_30_cash_spender = 'No' THEN 'Negative'
             ELSE 'Unknown'
         END AS translated_top_30_cash_spender,
-        customer_id,
-        first_name,
-        last_name,
-        email,
-        creation_date,
-        total_cash_spent
+        detailed_section.customer_id,
+        detailed_section.first_name,
+        detailed_section.last_name,
+        detailed_section.email,
+        detailed_section.creation_date,
+        detailed_section.total_cash_spent
     FROM detailed_section;
 END;
 $$
@@ -104,6 +104,7 @@ LANGUAGE PLPGSQL;
 -- Verify the accuracy of the function
 SELECT * FROM translate_top_30_cash_spender();
 SELECT * FROM detailed_section ORDER BY total_cash_spent DESC;
+
 
 
 
