@@ -53,37 +53,43 @@ SELECT * FROM detailed_section;
 
 D Write code for function(s) that perform the transformation(s) you identified in part A4
 
-
-CREATE OR REPLACE FUNCTION update_summary()
-  RETURNS TRIGGER AS
-$$
+-- Create or replace the function to perform the transformation
+CREATE OR REPLACE FUNCTION translate_top_30_cash_spender()
+    RETURNS TABLE (
+        translated_top_30_cash_spender VARCHAR(3),
+        customer_id INT,
+        first_name VARCHAR(50),
+        last_name VARCHAR(50),
+        email VARCHAR(100),
+        creation_date DATE,
+        total_cash_spent DECIMAL(10, 2)
+    ) AS $$
 BEGIN
-  INSERT INTO summary_section (customer_id, first_name, last_name, email, creation_date, total_cash_spent, top_30_cash_spender_translated)
-  VALUES (
-    NEW.customer_id,
-    NEW.first_name,
-    NEW.last_name,
-    NEW.email,
-    NEW.creation_date,
-    NEW.total_cash_spent,
-    CASE
-        WHEN NEW.top_30_cash_spender = 'Y' THEN 'Yes'
-        ELSE 'No'
-    END
-  )
-  ON CONFLICT (customer_id) DO UPDATE
-  SET
-    first_name = EXCLUDED.first_name,
-    last_name = EXCLUDED.last_name,
-    email = EXCLUDED.email,
-    creation_date = EXCLUDED.creation_date,
-    total_cash_spent = EXCLUDED.total_cash_spent,
-    top_30_cash_spender_translated = EXCLUDED.top_30_cash_spender_translated;
-
-  RETURN NEW;
+    UPDATE detailed_section
+    SET top_30_cash_spender =
+        CASE
+            WHEN top_30_cash_spender = 'Y' THEN 'Yes'
+            WHEN top_30_cash_spender = 'N' THEN 'No'
+        END
+    WHERE total_cash_spent > 0;
+    
+    RETURN QUERY SELECT
+        CASE
+            WHEN detailed_section.top_30_cash_spender = 'Yes' THEN 'Yes'
+            WHEN detailed_section.top_30_cash_spender = 'No' THEN 'No'
+            ELSE 'Unknown'
+        END AS translated_top_30_cash_spender,
+        detailed_section.customer_id,
+        detailed_section.first_name,
+        detailed_section.last_name,
+        detailed_section.email,
+        detailed_section.creation_date,
+        detailed_section.total_cash_spent
+    FROM detailed_section;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE PLPGSQL;
+
 
 -- Verify the accuracy of the function
 SELECT * FROM translate_top_30_cash_spender();
@@ -110,8 +116,9 @@ BEGIN
     NEW.creation_date,
     NEW.total_cash_spent,
     CASE
-        WHEN NEW.top_30_cash_spender = 'Y' THEN 'Yes'
-        ELSE 'No'
+      WHEN NEW.top_30_cash_spender = 'Y' THEN 'Yes'
+      WHEN NEW.top_30_cash_spender = 'N' THEN 'No'
+      ELSE 'Unknown'
     END
   )
   ON CONFLICT (customer_id) DO UPDATE
@@ -121,7 +128,11 @@ BEGIN
     email = EXCLUDED.email,
     creation_date = EXCLUDED.creation_date,
     total_cash_spent = EXCLUDED.total_cash_spent,
-    top_30_cash_spender_translated = EXCLUDED.top_30_cash_spender_translated;
+    top_30_cash_spender_translated = CASE
+      WHEN EXCLUDED.top_30_cash_spender = 'Y' THEN 'Yes'
+      WHEN EXCLUDED.top_30_cash_spender = 'N' THEN 'No'
+      ELSE 'Unknown'
+    END;
 
   RETURN NEW;
 END;
@@ -139,7 +150,7 @@ EXECUTE FUNCTION update_summary();
 -- Insert a row into the detailed_section table
 
 INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, payment_date, total_cash_spent, top_30_cash_spender)
-VALUES ('777', 'John', 'Doe', 'j.d@gmail.com', '2017-02-19', NULL, 0.0, 'N');
+VALUES ('888', 'Jane', 'Smith', 'jane.smith@example.com', '2013-07-10', '2013-07-15', 150.75, 'Y');
 
 
 
