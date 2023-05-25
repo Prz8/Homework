@@ -176,7 +176,7 @@ BEGIN
         c.create_date AS creation_date,
         SUM(f.rental_rate) AS total_cash_spent,
         CASE
-            WHEN SUM(f.rental_rate) > 110 THEN 'Y'
+            WHEN SUM(f.rental_rate) > 105 THEN 'Y'
             ELSE 'N'
         END AS top_30_cash_spender
     FROM
