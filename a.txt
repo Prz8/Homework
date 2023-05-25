@@ -143,13 +143,13 @@ SELECT * FROM summary_section;
 Create a stored procedure that can be used to refresh the data in both your detailed and summary tables. The procedure should clear the contents of the detailed and summary tables and perform the ETL load process from part C and include comments that identify how often the stored procedure should be executed.
 
 CREATE OR REPLACE PROCEDURE refresh_tables()
-LANGUAGE SQL
+LANGUAGE plpgsql
 AS $$
 BEGIN
     -- Clear the contents of the detailed and summary tables
-    DELETE FROM detailed_section;
-    DELETE FROM summary_section;
-    
+    EXECUTE 'DELETE FROM detailed_section';
+    EXECUTE 'DELETE FROM summary_section';
+
     -- Perform the ETL load process
     INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, total_cash_spent, top_30_cash_spender_translated)
     SELECT
@@ -175,13 +175,14 @@ BEGIN
         c.customer_id, c.first_name, c.last_name, c.email, c.create_date
     ORDER BY
         total_cash_spent DESC;
-        
+
     -- Update the translated value in the summary table
     UPDATE summary_section
     SET top_30_cash_spender_translated = translate_top_30_cash_spender(top_30_cash_spender_translated);
     
 END;
 $$;
+
 
 I verified that the stored procedure worked correctly by running the queries below.  
 
