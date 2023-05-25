@@ -96,6 +96,7 @@ SELECT * FROM detailed_section ORDER BY total_cash_spent DESC;
 
 
 
+
 E.	Write a SQL code that creates a trigger on the detailed table of the report that will continually update the summary table as data is added to the detailed table
 
 
