@@ -73,7 +73,7 @@ CREATE OR REPLACE FUNCTION translate_top_30_cash_spender()
         last_name VARCHAR(50),
         email VARCHAR(100),
         creation_date DATE,
-        total_cash_spent DECIMAL(10, 2)
+        cash_spent DECIMAL(10, 2)
     ) AS $$
 BEGIN
     UPDATE detailed_section
@@ -95,7 +95,7 @@ BEGIN
         detailed_section.last_name,
         detailed_section.email,
         detailed_section.creation_date,
-        detailed_section.total_cash_spent
+        detailed_section.total_cash_spent AS cash_spent
     FROM detailed_section;
 END;
 $$
