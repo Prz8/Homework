@@ -106,7 +106,7 @@ CREATE OR REPLACE FUNCTION update_summary()
 $$
 BEGIN
   -- Insert or update the corresponding row in the summary table
-  INSERT INTO summary_section (customer_id, first_name, last_name, email, creation_date, total_cash_spent, top_30_cash_spender_translated)
+  INSERT INTO summary_section (customer_id, first_name, last_name, email, creation_date, total_cash_spent, top_30_cash_spender)
   VALUES (
     NEW.customer_id,
     NEW.first_name,
@@ -114,7 +114,7 @@ BEGIN
     NEW.email,
     NEW.creation_date,
     NEW.total_cash_spent,
-    translate_top_30_cash_spender(NEW.top_30_cash_spender_translated)
+    translate_top_30_cash_spender(NEW.top_30_cash_spender)
   )
   ON CONFLICT (customer_id) DO UPDATE
   SET
@@ -123,7 +123,7 @@ BEGIN
     email = EXCLUDED.email,
     creation_date = EXCLUDED.creation_date,
     total_cash_spent = EXCLUDED.total_cash_spent,
-    top_30_cash_spender_translated = EXCLUDED.top_30_cash_spender_translated;
+    top_30_cash_spender = EXCLUDED.top_30_cash_spender;
 
   RETURN NEW;
 END;
