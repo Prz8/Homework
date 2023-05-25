@@ -41,7 +41,7 @@ SELECT
     p.payment_date,
     p.amount AS total_cash_spent,
     CASE
-        WHEN p.amount > 105 THEN 'Y'
+        WHEN p.amount > 110 THEN 'Y'
         ELSE 'N'
     END AS top_30_cash_spender
 FROM
@@ -172,7 +172,7 @@ BEGIN
         p.payment_date,
         p.amount AS total_cash_spent,
         CASE
-            WHEN p.amount > 105 THEN 'Y'
+            WHEN p.amount > 110 THEN 'Y'
             ELSE 'N'
         END AS top_30_cash_spender
     FROM
