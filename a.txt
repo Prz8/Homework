@@ -51,9 +51,10 @@ SELECT * FROM detailed_section;
 
 
 
-Write code for function(s) that perform the transformation(s) you identified in part A4
+D Write code for function(s) that perform the transformation(s) you identified in part A4
 
 
+-- Create or replace the function to perform the translation
 CREATE OR REPLACE FUNCTION translate_top_30_cash_spender(value CHAR(1))
     RETURNS VARCHAR(3) AS
 $$
@@ -63,15 +64,13 @@ BEGIN
     ELSIF value = 'N' THEN
         RETURN 'No';
     ELSE
-        RETURN value;
+        RETURN 'Unknown';
     END IF;
 END;
 $$
 LANGUAGE PLPGSQL;
 
-
-I verified the accuracy of the function by running these queries below.
-
+-- Verify the accuracy of the function
 SELECT
     customer_id,
     first_name,
@@ -80,9 +79,10 @@ SELECT
     creation_date,
     payment_date,
     total_cash_spent,
-    translate_top_30_cash_spender(top_30_cash_spender_translated) AS translated_top_30_cash_spender
+    translate_top_30_cash_spender(top_30_cash_spender) AS translated_top_30_cash_spender
 FROM
     detailed_section;
+
 
 
 
