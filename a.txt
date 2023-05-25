@@ -48,6 +48,9 @@ FROM
     customer c
 JOIN
     payment p ON c.customer_id = p.customer_id;
+    
+-- Verify the data’s accuracy
+SELECT * FROM detailed_section;
 
 
 
