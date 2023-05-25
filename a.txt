@@ -137,10 +137,17 @@ FOR EACH ROW
 EXECUTE FUNCTION update_summary();
 
 -- Verification query
+
+-- Insert a row into the detailed_section table
+INSERT INTO detailed_section (customer_id, first_name, last_name, email, creation_date, payment_date, total_cash_spent, top_30_cash_spender)
+VALUES ('777', 'John', 'Doe', 'j.d@gmail.com', '2017-02-19', NULL, 0.0, 'N');
+
+-- Check the summary_section table
 SELECT * FROM summary_section;
 
 
-Create a stored procedure that can be used to refresh the data in both your detailed and summary tables. The procedure should clear the contents of the detailed and summary tables and perform the ETL load process from part C and include comments that identify how often the stored procedure should be executed.
+
+F. Create a stored procedure that can be used to refresh the data in both your detailed and summary tables. The procedure should clear the contents of the detailed and summary tables and perform the ETL load process from part C and include comments that identify how often the stored procedure should be executed.
 
 CREATE OR REPLACE PROCEDURE refresh_tables()
 LANGUAGE plpgsql
