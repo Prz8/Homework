@@ -183,9 +183,6 @@ BEGIN
 END;
 $$;
 
-
-I verified that the stored procedure worked correctly by running the queries below.  
-
 -- Call the refresh_tables procedure
 CALL refresh_tables();
 
