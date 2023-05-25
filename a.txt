@@ -68,11 +68,11 @@ BEGIN
     UPDATE detailed_section
     SET top_30_cash_spender =
         CASE
-            WHEN top_30_cash_spender = 'Y' THEN 'Yes'
-            WHEN top_30_cash_spender = 'N' THEN 'No'
+            WHEN detailed_section.top_30_cash_spender = 'Y' THEN 'Yes'
+            WHEN detailed_section.top_30_cash_spender = 'N' THEN 'No'
         END
-    WHERE total_cash_spent > 0;
-    
+    WHERE detailed_section.total_cash_spent > 0;
+
     RETURN QUERY SELECT
         CASE
             WHEN detailed_section.top_30_cash_spender = 'Yes' THEN 'Yes'
@@ -90,10 +90,10 @@ END;
 $$
 LANGUAGE PLPGSQL;
 
-
 -- Verify the accuracy of the function
 SELECT * FROM translate_top_30_cash_spender();
 SELECT * FROM detailed_section ORDER BY total_cash_spent DESC;
+
 
 
 
