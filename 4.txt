@@ -1,0 +1,17 @@
+CREATE OR REPLACE FUNCTION transform_top_10_spenders()
+  RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.top_10_spender = 'Y' THEN
+    NEW.top_10_spender := 'Yes';
+  ELSIF NEW.top_10_spender = 'N' THEN
+    NEW.top_10_spender := 'No';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_transform_top_10_spenders
+BEFORE INSERT OR UPDATE ON detailed_table
+FOR EACH ROW
+EXECUTE FUNCTION transform_top_10_spenders();
