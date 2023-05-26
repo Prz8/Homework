@@ -1,0 +1,26 @@
+INSERT INTO detailed_table (
+  customer_id,
+  first_name,
+  last_name,
+  total_payment,
+  top_10_spender
+)
+SELECT
+  c.customer_id,
+  c.first_name,
+  c.last_name,
+  SUM(p.amount) AS total_payment,
+  CASE WHEN c.customer_id IN (
+    SELECT DISTINCT customer_id
+    FROM payment
+    ORDER BY SUM(amount) DESC
+    LIMIT 10
+  ) THEN 'Yes' ELSE 'No' END AS top_10_spender
+FROM
+  customer AS c
+JOIN
+  payment AS p ON c.customer_id = p.customer_id
+GROUP BY
+  c.customer_id,
+  c.first_name,
+  c.last_name;
