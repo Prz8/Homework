@@ -1,0 +1,96 @@
+1) Detailed Table:
+
+    Customer ID (customer_id)
+    First Name (first_name)
+    Last Name (last_name)
+    Total Payment (total_payment)
+    Top 10 Spender (top_10_spender)
+
+Summary Table:
+
+    Customer ID (customer_id)
+    First Name (first_name)
+    Last Name (last_name)
+    Total Payment (total_payment)
+
+
+2) The data fields used for the report can have the following types of data:
+
+    Customer ID (customer_id): This field typically uses an integer data type to store unique identifiers for each customer.
+
+    First Name (first_name) and Last Name (last_name): These fields typically use varchar data type to store the names of the customers.
+
+    Total Payment (total_payment): This field can use a numeric data type, such as float, to store the total payment amount made by each customer.
+
+    Top 10 Spender (top_10_spender): This field can use a varchar data type to store a label indicating whether a customer is one of the top 10 spenders. It can have values like "Yes" or "No" to represent this information.
+
+
+
+3) Based on the provided dataset, the two specific tables that will provide the necessary data for the detailed table section and the summary table section of the report are:
+
+    Customers Table:
+    The Customers table contains information about each customer, including their customer ID, first name, last name, and other details. This table will provide the necessary data for the detailed table section, including customer details such as customer ID, first name, and last name.
+
+    Payments Table:
+    The Payments table contains information about each payment made by customers, including the customer ID, payment amount, and payment date. This table will provide the necessary data to calculate the total payment for each customer, which is required for both the detailed and summary table sections of the report.
+
+By joining these two tables using the customer_id field, you can retrieve the relevant data to populate the detailed and summary tables for the report.
+
+
+4) To enhance the clarity and user-friendliness of the table, the values in the top_10 spenders' column will be translated as follows: 'Y' will be changed to 'Yes', and 'N' will be changed to 'No'. This adjustment aims to make the table more intuitive and facilitate comprehension, particularly for less experienced users. By employing this translation, users can readily understand and extract information from the table without confusion.
+
+5) The detailed table section of the report is useful for in-depth analysis of customer behavior, identifying patterns, and understanding the spending habits of each customer. It allows businesses to gain insights into individual customer performance and make personalized marketing or sales strategies based on specific customer profiles.
+
+On the other hand, the summary table section provides high-level analysis and quick assessment of overall customer performance. It helps businesses identify the top spenders based on total payment amounts, prioritize customer segments, and make strategic decisions regarding resource allocation, and customer loyalty programs.
+
+
+6) The frequency of updating the report should be based on the stakeholders' specific needs. To ensure that the report remains relevant and up to date, it's recommended to update it at least monthly, given the regular release of new movies on DVD. Automating the update process can be achieved by using a scheduling tool such as pgAgent, which can execute the necessary procedures at specified intervals. It's important to note that pgAgent is not a built-in feature of pgAdmin4 and requires separate installation before use.
+
+
+8)
+-- Creating Detailed Table
+CREATE TABLE detailed_table (
+  customer_id INTEGER,
+  first_name VARCHAR(255),
+  last_name VARCHAR(255),
+  total_payment FLOAT,
+  top_10_spender VARCHAR(3)
+);
+
+-- Creating Summary Table
+CREATE TABLE summary_table (
+  customer_id INTEGER,
+  first_name VARCHAR(255),
+  last_name VARCHAR(255),
+  total_payment FLOAT
+);
+
+
+
+9) INSERT INTO detailed_table (
+  customer_id,
+  first_name,
+  last_name,
+  total_payment,
+  top_10_spender
+)
+SELECT
+  c.customer_id,
+  c.first_name,
+  c.last_name,
+  SUM(p.amount) AS total_payment,
+  CASE WHEN c.customer_id IN (
+    SELECT DISTINCT customer_id
+    FROM payments
+    ORDER BY total_payment DESC
+    LIMIT 10
+  ) THEN 'Yes' ELSE 'No' END AS top_10_spender
+FROM
+  customers AS c
+JOIN
+  payments AS p ON c.customer_id = p.customer_id
+GROUP BY
+  c.customer_id,
+  c.first_name,
+  c.last_name;
+
