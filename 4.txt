@@ -11,10 +11,14 @@ SELECT
   c.last_name,
   SUM(p.amount) AS total_payment,
   CASE WHEN c.customer_id IN (
-    SELECT DISTINCT customer_id
-    FROM payment
-    ORDER BY SUM(amount) DESC
-    LIMIT 10
+    SELECT customer_id
+    FROM (
+      SELECT customer_id
+      FROM payment
+      GROUP BY customer_id
+      ORDER BY SUM(amount) DESC
+      LIMIT 10
+    ) AS top_spenders
   ) THEN 'Yes' ELSE 'No' END AS top_10_spender
 FROM
   customer AS c
