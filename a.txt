@@ -91,13 +91,11 @@ FOR EACH STATEMENT
 EXECUTE FUNCTION refresh_summary_function();
 
 —- Queries I ran: 
--- Insert a new record into the 'detailed' table
+--- Insert a new record into the 'detailed' table and show the updated record in the 'summary' table.
 INSERT INTO detailed (rental_id, customer_id, first_name, last_name, email, address_id, active, rental_date)
-VALUES (1001, 12345, 'John', 'Doe', 'john.doe@example.com', 1, 'Y', '2023-05-01 10:00:00');
+VALUES (777, 'John Doe', 0.0, 'j.d@gmail.com', '2-19-2017', 'No');
 
--- Show the updated records in the 'summary' table
-SELECT *
-FROM summary;
+SELECT * FROM summary;
 
 
 -- PART F: Create a stored procedure to refresh data in both tables.
