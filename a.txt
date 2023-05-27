@@ -120,9 +120,15 @@ BEGIN
   
   -- Update the summary table with the latest customer summary data from the detailed table
   INSERT INTO summary (customer_id, full_name, email, total_rentals)
-  SELECT
+  SELECT customer_id, CONCAT(first_name, ' ', last_name) AS full_name, email, COUNT(*) AS total_rentals
+  FROM detailed
+  GROUP BY customer_id, full_name, email
+  ORDER BY total_rentals DESC
+  LIMIT 25;
+  
+END;
+$$;
 
-—- Queries I ran:
 -- Execute the refresh stored procedure
 CALL refresh();
 
@@ -133,5 +139,6 @@ LIMIT 10;
 
 -- Show the updated records in the 'summary' table
 SELECT *
-FROM summary;
+FROM summary
+LIMIT 10;
 
