@@ -90,10 +90,10 @@ AFTER INSERT ON detailed
 FOR EACH STATEMENT
 EXECUTE FUNCTION refresh_summary_function();
 
-—- Queries I ran: 
---- Insert a new record into the 'detailed' table and show the updated record in the 'summary' table.
+-- Insert a new record into the 'detailed' table and show the updated record in the 'summary' table.
+
 INSERT INTO detailed (rental_id, customer_id, first_name, last_name, email, address_id, active, rental_date)
-VALUES (777, 'John Doe', 0.0, 'j.d@gmail.com', '2-19-2017', 'No');
+VALUES (777, 12345, 'John', 'Doe', 'j.d@gmail.com', 2, 'No', '2017-02-19');
 
 SELECT * FROM summary;
 
