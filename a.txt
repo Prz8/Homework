@@ -57,17 +57,17 @@ AS $$
 BEGIN
   -- Clear the existing data in the summary table
   DELETE FROM summary;
-  
+
   -- Update the summary table with the latest customer summary data from the detailed table
   INSERT INTO summary (customer_id, full_name, email, total_rentals)
   SELECT customer_id, CONCAT(first_name, ' ', last_name), email, COUNT(*) AS total_rentals
   FROM detailed
   WHERE active = 'Y' -- Considers only the active customers
   GROUP BY customer_id, full_name, email
-  HAVING COUNT(*) >= 5 
+  HAVING COUNT(*) >= 5
   ORDER BY total_rentals DESC
-  LIMIT 25; 
-  
+  LIMIT 25;
+
   RETURN NEW;
 END;
 $$;
