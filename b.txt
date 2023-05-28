@@ -25,10 +25,6 @@ END;
 $$;
 
 
-Query to show the updated records in the summary table:
-SELECT * FROM summary; 
-
-
 
 --C. 
 
@@ -110,8 +106,6 @@ BEGIN
 END;
 $$;
 
--- Query to execute the refresh stored procedure and to show the updated records in the detailed table and summary table:
-
-CALL refresh();
+-- Query to show the updated records in the detailed table 
 SELECT * FROM detailed LIMIT 10;
-SELECT * FROM summary LIMIT 10;
+
