@@ -1,0 +1,117 @@
+--B. 
+-- Function to refresh the summary table when new data is added to the detailed table
+
+CREATE FUNCTION refresh_summary_function()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+  -- Clear the existing data in the summary table
+  DELETE FROM summary;
+
+  -- Update the summary table with the latest customer summary data from the detailed table
+  INSERT INTO summary (customer_id, full_name, email, total_rentals)
+  SELECT customer_id, CONCAT(first_name, ' ', last_name), email, COUNT(*) AS total_rentals
+  FROM detailed
+  WHERE active = 'Y' -- Considers only the active customers
+  GROUP BY customer_id, full_name, email
+  HAVING COUNT(*) >= 5
+  ORDER BY total_rentals DESC
+  LIMIT 25;
+
+  RETURN NEW;
+END;
+$$;
+
+
+Query to show the updated records in the summary table:
+SELECT * FROM summary; 
+
+
+
+--C. 
+
+CREATE TABLE detailed (
+  rental_id INT PRIMARY KEY,
+  customer_id INT,
+  first_name VARCHAR(50),
+  last_name VARCHAR(50),
+  email VARCHAR(100),
+  address_id INT,
+  active CHAR(1),
+  rental_date TIMESTAMP
+);
+
+
+CREATE TABLE summary (
+  customer_id INT PRIMARY KEY,
+  full_name VARCHAR(100),
+  email VARCHAR(100),
+  total_rentals INT
+); 
+
+
+--D. 
+
+INSERT INTO detailed (rental_id, customer_id, first_name, last_name, email, address_id, active, rental_date)
+SELECT r.rental_id, c.customer_id, c.first_name, c.last_name, c.email, c.address_id, c.active, r.rental_date
+FROM rental AS r
+JOIN customer AS c ON c.customer_id = r.customer_id
+JOIN address AS a ON a.address_id = c.address_id;
+
+Query that I used to show the records in the detailed table:
+
+SELECT * FROM detailed; 
+
+
+--E. 
+-- Trigger to automatically refresh the summary table when new data is inserted into the detailed table
+
+CREATE TRIGGER refresh_summary_table
+AFTER INSERT ON detailed
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_summary_function();
+
+-- Query to show the updated records in the summary table:
+SELECT * FROM summary; 
+
+
+--F. Stored procedure that can be used to refresh the data in both your detailed and summary tables. The procedure should clear the contents of the detailed and summary tables and perform the raw data extraction from part D.
+
+-- Stored procedure to manually refresh data in both the detailed and summary tables
+
+CREATE OR REPLACE PROCEDURE refresh()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+  -- Clear the existing data in the detailed table
+  DELETE FROM detailed;
+  
+  -- Repopulated the detailed table with rental information
+  INSERT INTO detailed (rental_id, customer_id, first_name, last_name, email, address_id, active, rental_date)
+  SELECT r.rental_id, c.customer_id, c.first_name, c.last_name, c.email, c.address_id, c.active, r.rental_date
+  FROM rental AS r
+  JOIN customer AS c ON c.customer_id = r.customer_id
+  JOIN address AS a ON a.address_id = c.address_id;
+  
+  -- Cleared the existing data in the summary table
+  DELETE FROM summary;
+  
+  -- Updated the summary table with the latest customer summary data from the detailed table
+  INSERT INTO summary (customer_id, full_name, email, total_rentals)
+  SELECT customer_id, CONCAT(first_name, ' ', last_name) AS full_name, email, COUNT(*) AS total_rentals
+  FROM detailed
+  GROUP BY customer_id, full_name, email
+  ORDER BY total_rentals DESC
+  LIMIT 25;
+  
+END;
+$$;
+
+-- Query to execute the refresh stored procedure and to show the updated records in the detailed table and summary table:
+
+CALL refresh();
+SELECT * FROM detailed LIMIT 10;
+SELECT * FROM summary LIMIT 10;
