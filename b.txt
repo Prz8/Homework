@@ -12,7 +12,7 @@ BEGIN
   INSERT INTO summary (customer_id, full_name, email, total_rentals)
   SELECT customer_id, CONCAT(first_name, ' ', last_name), email, COUNT(*) AS total_rentals
   FROM detailed
-  WHERE active = '1' – Considers only active customers (1 represents active)
+  WHERE active = '1' -- Considers only active customers (1 represents active)
 
   GROUP BY customer_id, full_name, email
   HAVING COUNT(*) >= 5
@@ -67,9 +67,6 @@ AFTER INSERT ON detailed
 FOR EACH STATEMENT
 EXECUTE FUNCTION refresh_summary_function();
 
--- Query to show the updated records in the summary table:
-SELECT * FROM summary; 
-
 
 --F. Stored procedure that can be used to refresh the data in both your detailed and summary tables. The procedure should clear the contents of the detailed and summary tables and perform the raw data extraction from part D.
 
@@ -109,11 +106,6 @@ $$;
 
 
 
--- Query to show the updated records in the detailed table and summary table:
+-- Query to show the updated records in the detailed table
 
 SELECT * FROM detailed LIMIT 7;
-SELECT * FROM summary LIMIT 7;
-
-
---F1.  Using PostgreSQL, you can use the pgAdmin software scheduling tool’s built-in functionality, to create jobs that automate the execution of scripts, including calling the refresh () stored procedure, at specified intervals. 
-
