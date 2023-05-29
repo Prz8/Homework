@@ -1,12 +1,10 @@
---B. 
--- Function to refresh the summary table when new data is added to the detailed table
+--B. Function to refresh the summary table when new data is added to the detailed table
 
 CREATE FUNCTION refresh_summary_function()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-
   -- Clear the existing data in the summary table
   DELETE FROM summary;
 
@@ -14,7 +12,8 @@ BEGIN
   INSERT INTO summary (customer_id, full_name, email, total_rentals)
   SELECT customer_id, CONCAT(first_name, ' ', last_name), email, COUNT(*) AS total_rentals
   FROM detailed
-  WHERE active = 'Y' -- Considers only the active customers
+  WHERE active = '1' – Considers only active customers (1 represents active)
+
   GROUP BY customer_id, full_name, email
   HAVING COUNT(*) >= 5
   ORDER BY total_rentals DESC
@@ -23,7 +22,6 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
 
 
 --C. 
@@ -56,7 +54,7 @@ FROM rental AS r
 JOIN customer AS c ON c.customer_id = r.customer_id
 JOIN address AS a ON a.address_id = c.address_id;
 
-Query that I used to show the records in the detailed table:
+--Query that I used to verify the records in the detailed table:
 
 SELECT * FROM detailed; 
 
@@ -86,6 +84,7 @@ BEGIN
   DELETE FROM detailed;
   
   -- Repopulated the detailed table with rental information
+
   INSERT INTO detailed (rental_id, customer_id, first_name, last_name, email, address_id, active, rental_date)
   SELECT r.rental_id, c.customer_id, c.first_name, c.last_name, c.email, c.address_id, c.active, r.rental_date
   FROM rental AS r
@@ -96,16 +95,25 @@ BEGIN
   DELETE FROM summary;
   
   -- Updated the summary table with the latest customer summary data from the detailed table
-  INSERT INTO summary (customer_id, full_name, email, total_rentals)
-  SELECT customer_id, CONCAT(first_name, ' ', last_name) AS full_name, email, COUNT(*) AS total_rentals
+INSERT INTO summary (customer_id, full_name, email, total_rentals)
+  SELECT customer_id, CONCAT(first_name, ' ', last_name), email, COUNT(*) AS total_rentals
   FROM detailed
+  WHERE active = '1' -- Considers only active customers (1 represents active)
   GROUP BY customer_id, full_name, email
+  HAVING COUNT(*) >= 5
   ORDER BY total_rentals DESC
   LIMIT 25;
   
 END;
 $$;
 
--- Query to show the updated records in the detailed table 
-SELECT * FROM detailed LIMIT 10;
+
+
+-- Query to show the updated records in the detailed table and summary table:
+
+SELECT * FROM detailed LIMIT 7;
+SELECT * FROM summary LIMIT 7;
+
+
+--F1.  Using PostgreSQL, you can use the pgAdmin software scheduling tool’s built-in functionality, to create jobs that automate the execution of scripts, including calling the refresh () stored procedure, at specified intervals. 
 
